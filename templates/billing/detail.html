@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Invoice {{ invoice.number }}{% endblock %}
+{% block content %}
+<div class="btn-row no-print" style="justify-content:space-between;margin-bottom:16px">
+  <a href="{% url 'invoice_list' %}">Back to invoices</a>
+  <div class="btn-row">
+    {% if can_pay_online %}<form class="inline" method="post" action="{% url 'pay_online' invoice.id %}">{% csrf_token %}<button class="btn accent" type="submit">Pay {{ CURRENCY }}{{ invoice.balance|floatformat:2 }} online</button></form>{% endif %}
+    <button class="btn ghost" onclick="window.print()">Print or save as PDF</button>
+  </div>
+</div>
+<section class="invoice">
+  <div class="invoice-head">
+    <div><h1 style="margin:0">{{ CLINIC_NAME }}</h1><p class="muted" style="margin:0">Invoice {{ invoice.number }}</p></div>
+    <div style="text-align:right"><span class="badge {{ invoice.badge }}">{{ invoice.status|capfirst }}</span><br>Issued {{ invoice.created_at|date:"j F Y" }}<br>Billed to <strong>{{ invoice.patient.display_name }}</strong></div>
+  </div>
+  {% if invoice.notes %}<p class="muted">{{ invoice.notes }}</p>{% endif %}
+  <table>
+    <thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th>{% if ops %}<th class="no-print"></th>{% endif %}</tr></thead>
+    <tbody>{% for i in invoice.items.all %}
+      <tr><td>{{ i.description }}</td><td class="num">{{ i.quantity }}</td><td class="num">{{ CURRENCY }}{{ i.unit_price|floatformat:2 }}</td><td class="num">{{ CURRENCY }}{{ i.amount|floatformat:2 }}</td>
+        {% if ops %}<td class="no-print">{% if invoice.can_edit_items %}<form class="inline" method="post" action="{% url 'item_delete' invoice.id i.id %}">{% csrf_token %}<button class="btn danger small" type="submit">Remove</button></form>{% endif %}</td>{% endif %}</tr>
+    {% empty %}<tr><td colspan="5" class="muted">No charges added yet.</td></tr>{% endfor %}</tbody>
+  </table>
+  <div class="totals">
+    <div><span>Total</span><span class="num">{{ CURRENCY }}{{ invoice.total|floatformat:2 }}</span></div>
+    <div><span>Paid</span><span class="num">{{ CURRENCY }}{{ invoice.paid|floatformat:2 }}</span></div>
+    <div class="due"><span>Balance due</span><span class="num">{{ CURRENCY }}{{ invoice.balance|floatformat:2 }}</span></div>
+  </div>
+  {% if invoice.payments.all %}
+  <h3 style="margin-top:28px">Payments received</h3>
+  <ul class="outline">{% for p in invoice.payments.all %}<li><div class="grow">{{ p.paid_at|date:"j M Y, H:i" }}<div class="tiny">{{ p.get_method_display }}{% if p.reference %}, ref {{ p.reference }}{% endif %}</div></div><strong>{{ CURRENCY }}{{ p.amount|floatformat:2 }}</strong></li>{% endfor %}</ul>
+  {% endif %}
+</section>
+
+{% if ops and not invoice.is_void %}
+<div class="grid cols-2 no-print" style="margin-top:20px">
+  {% if item_form %}
+  <form class="panel" method="post" action="{% url 'item_add' invoice.id %}" style="margin:0">{% csrf_token %}
+    <h3>Add a charge</h3>{% include "partials/form_fields.html" with form=item_form %}<button class="btn" type="submit">Add charge</button>
+  </form>
+  {% endif %}
+  {% if payment_form %}
+  <form class="panel" method="post" action="{% url 'payment_add' invoice.id %}" style="margin:0">{% csrf_token %}
+    <h3>Record a payment</h3>{% include "partials/form_fields.html" with form=payment_form %}<button class="btn accent" type="submit">Record payment</button>
+  </form>
+  {% endif %}
+</div>
+{% if not invoice.payments.exists %}
+<form class="no-print" method="post" action="{% url 'invoice_void' invoice.id %}" style="margin-top:16px" onsubmit="return confirm('Void this invoice?')">{% csrf_token %}<button class="btn danger small" type="submit">Void invoice</button></form>
+{% endif %}
+{% endif %}
+{% endblock %}

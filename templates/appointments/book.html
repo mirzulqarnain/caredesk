@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Book an appointment{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Book an appointment</h1><p>Pick a doctor and a date, then choose one of the free times.</p></div></div>
+<div class="split">
+  <div>
+    <form class="panel" method="get">
+      <h2>1. Doctor and date</h2>
+      {% if patients is not None %}
+      <div class="field"><label for="patient">Patient</label>
+        <select id="patient" name="patient">
+          <option value="">Choose a patient</option>
+          {% for p in patients %}<option value="{{ p.id }}" {% if patient and p.id == patient.id %}selected{% endif %}>{{ p.display_name }} ({{ p.username }})</option>{% endfor %}
+        </select>
+        <small>Not registered yet? <a href="{% url 'patient_create' %}">Register a new patient</a>.</small></div>
+      {% endif %}
+      <div class="field"><label for="doctor">Doctor</label>
+        <select id="doctor" name="doctor" required>
+          <option value="">Choose a doctor</option>
+          {% for d in doctors %}<option value="{{ d.id }}" {% if doctor and d.id == doctor.id %}selected{% endif %}>{{ d.name }} - {{ d.specialty.name|default:"General" }} ({{ CURRENCY }}{{ d.consultation_fee|floatformat:2 }})</option>{% endfor %}
+        </select></div>
+      <div class="field"><label for="date">Date</label>
+        <input id="date" type="date" name="date" required value="{% if day %}{{ day|date:'Y-m-d' }}{% else %}{{ default_date }}{% endif %}" min="{{ min_date|date:'Y-m-d' }}" max="{{ max_date|date:'Y-m-d' }}"></div>
+      <button class="btn" type="submit">Show free times</button>
+    </form>
+
+    {% if doctor and day %}
+    <form class="panel" method="post">{% csrf_token %}
+      <h2>2. Choose a time</h2>
+      <p class="muted">{{ doctor.name }}, {{ day|date:"l j F Y" }}</p>
+      <input type="hidden" name="doctor" value="{{ doctor.id }}">
+      <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+      {% if patients is not None %}<input type="hidden" name="patient" value="{{ patient.id|default:'' }}">{% endif %}
+      {% if slots %}
+        <div class="slots" role="radiogroup" aria-label="Free times">
+          {% for start, end in slots %}<label><input type="radio" name="slot" value="{{ start|time:'H:i' }}" required><span class="slot">{{ start|time:"H:i" }}</span></label>{% endfor %}
+        </div>
+        <div class="field"><label for="reason">Reason for visit (optional)</label><input id="reason" type="text" name="reason" maxlength="240" placeholder="For example: fever for two days"></div>
+        {% if patients is not None and not patient %}<p class="err">Choose a patient in step 1 first, then press Show free times again.</p>{% endif %}
+        <button class="btn accent" type="submit">Confirm booking</button>
+      {% else %}
+        <div class="empty"><p>No free times on this date. The doctor may not work that day, or every slot is taken.</p>
+          <a class="btn ghost small" href="{% url 'doctor_detail' doctor.id %}">See working days</a></div>
+      {% endif %}
+    </form>
+    {% endif %}
+  </div>
+  <aside class="panel">
+    <h3>Good to know</h3>
+    <ul style="padding-left:18px;margin:0" class="muted">
+      <li>You can book up to 60 days ahead.</li>
+      <li>Cancel any time before the visit and the slot opens up again.</li>
+      <li>After the visit your prescription and invoice appear in your account.</li>
+    </ul>
+  </aside>
+</div>
+{% endblock %}

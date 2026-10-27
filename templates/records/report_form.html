@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Upload lab report{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="crumbs"><a href="{% url 'report_list' %}">Lab reports</a> / Upload</div>
+  <div class="form-card">
+    <h1>Upload a lab report</h1>
+    <p class="muted">For {{ patient.display_name }}. PDF, image or text file, up to 25 MB. It is stored in Amazon S3 when enabled.</p>
+    <form method="post" enctype="multipart/form-data" onsubmit="var b=this.querySelector('button[type=submit]');b.disabled=true;b.textContent='Uploading...';">{% csrf_token %}
+      {% if not user.is_patient %}<input type="hidden" name="patient" value="{{ patient.id }}">{% endif %}
+      {% include "partials/form_fields.html" %}
+      <div class="form-actions"><button class="btn" type="submit">Upload report</button><a class="btn ghost" href="{% url 'report_list' %}">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

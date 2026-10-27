@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if user.is_patient %}My invoices{% else %}Billing{% endif %}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{% if user.is_patient %}My invoices{% else %}Billing{% endif %}</h1><p>Outstanding in this list: <strong>{{ CURRENCY }}{{ outstanding|floatformat:2 }}</strong></p></div>
+  {% if user.runs_operations %}<a class="btn" href="{% url 'invoice_create' %}">New invoice</a>{% endif %}</div>
+<form class="filters" method="get">
+  {% if not user.is_patient %}<input type="search" name="q" value="{{ q }}" placeholder="Invoice number or patient" aria-label="Search invoices">{% endif %}
+  <select name="status" aria-label="Status"><option value="">Any status</option>{% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s|capfirst }}</option>{% endfor %}</select>
+  <button class="btn" type="submit">Apply</button>
+</form>
+{% if invoices %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Invoice</th>{% if not user.is_patient %}<th>Patient</th>{% endif %}<th>Date</th><th class="num">Total</th><th class="num">Balance</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for i in invoices %}
+    <tr><td><strong>{{ i.number }}</strong></td>{% if not user.is_patient %}<td>{{ i.patient.display_name }}</td>{% endif %}
+      <td>{{ i.created_at|date:"j M Y" }}</td><td class="num">{{ CURRENCY }}{{ i.total|floatformat:2 }}</td><td class="num">{{ CURRENCY }}{{ i.balance|floatformat:2 }}</td>
+      <td><span class="badge {{ i.badge }}">{{ i.status|capfirst }}</span></td>
+      <td><div class="row-actions"><a class="btn ghost small" href="{% url 'invoice_detail' i.id %}">Open</a></div></td></tr>
+  {% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><p>No invoices to show.</p></div>{% endif %}
+{% endblock %}

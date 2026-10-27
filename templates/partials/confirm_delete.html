@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ kind }}{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="form-card">
+    <h1>Delete this {{ kind }}?</h1>
+    <p><strong>{{ object_name }}</strong></p>
+    <p class="muted">{{ warning }} This cannot be undone.</p>
+    <form method="post" class="form-actions">
+      {% csrf_token %}
+      <button class="btn danger" type="submit">Delete {{ kind }}</button>
+      <a class="btn ghost" href="{{ cancel_url }}">Keep it</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

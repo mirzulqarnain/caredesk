@@ -1,0 +1,51 @@
+# PART II: brought up by Jenkins with
+#   docker compose -p caredesk_ci -f docker-compose.jenkins.yml up -d
+# Code is mounted as a volume (no Dockerfile). Different container names and ports from Part I.
+services:
+  ci_db:
+    image: postgres:16-alpine
+    container_name: caredesk_ci_db
+    environment:
+      POSTGRES_DB: caredesk_ci
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ChangeMe123
+    volumes:
+      - caredesk_ci_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d caredesk_ci"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ci_web:
+    image: python:3.12-slim
+    container_name: caredesk_ci_web
+    working_dir: /app
+    depends_on:
+      ci_db:
+        condition: service_healthy
+    environment:
+      SECRET_KEY: ci-secret-key
+      DEBUG: "False"
+      ALLOWED_HOSTS: "*"
+      DB_HOST: ci_db
+      DB_PORT: "5432"
+      DB_NAME: caredesk_ci
+      DB_USER: postgres
+      DB_PASSWORD: ChangeMe123
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ChangeMeAdmin1
+      SEED_DEMO: "True"
+      PIP_ROOT_USER_ACTION: ignore
+    volumes:
+      - ./:/app                                      # code attached as a volume
+    ports:
+      - "8081:8000"
+    command: >
+      sh -c "pip install --no-cache-dir -r requirements.txt &&
+             sh docker-entrypoint.sh gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
+
+volumes:
+  caredesk_ci_pgdata:

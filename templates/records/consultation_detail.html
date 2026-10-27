@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Visit summary{% endblock %}
+{% block content %}
+<div class="btn-row no-print" style="justify-content:space-between;margin-bottom:16px">
+  <a href="{% url 'appointment_detail' appt.id %}">Back to appointment</a>
+  <button class="btn" onclick="window.print()">Print or save as PDF</button>
+</div>
+<section class="invoice">
+  <div class="invoice-head">
+    <div><h1 style="margin:0">{{ CLINIC_NAME }}</h1><p class="muted" style="margin:0">Visit summary and prescription</p></div>
+    <div style="text-align:right"><strong>{{ appt.date|date:"j F Y" }}</strong><br>{{ appt.doctor.name }}<br><span class="muted">{{ appt.doctor.specialty.name|default:"" }}</span></div>
+  </div>
+  <dl class="facts" style="grid-template-columns:130px 1fr;margin-bottom:20px">
+    <dt>Patient</dt><dd>{{ appt.patient.display_name }}{% if profile.age %}, {{ profile.age }} years{% endif %}</dd>
+    <dt>Diagnosis</dt><dd>{{ c.diagnosis }}</dd>
+    {% if c.symptoms %}<dt>Symptoms</dt><dd>{{ c.symptoms }}</dd>{% endif %}
+    {% if c.notes %}<dt>Advice</dt><dd>{{ c.notes }}</dd>{% endif %}
+    {% if c.follow_up_date %}<dt>Follow up</dt><dd>{{ c.follow_up_date|date:"l j F Y" }}</dd>{% endif %}
+  </dl>
+  {% if c.blood_pressure or c.pulse or c.temperature or c.weight_kg %}
+  <div class="vitals">
+    {% if c.blood_pressure %}<div><b>{{ c.blood_pressure }}</b><span>Blood pressure</span></div>{% endif %}
+    {% if c.pulse %}<div><b>{{ c.pulse }}</b><span>Pulse (bpm)</span></div>{% endif %}
+    {% if c.temperature %}<div><b>{{ c.temperature }}</b><span>Temperature (C)</span></div>{% endif %}
+    {% if c.weight_kg %}<div><b>{{ c.weight_kg }}</b><span>Weight (kg)</span></div>{% endif %}
+  </div>{% endif %}
+  <h2>Prescription</h2>
+  {% for rx in c.prescriptions.all %}
+    <div class="rx-row"><div><strong>{{ forloop.counter }}. {{ rx.medicine }}</strong> {{ rx.dosage }}<div class="tiny">{{ rx.frequency }}{% if rx.instructions %}. {{ rx.instructions }}{% endif %}</div></div><div>{{ rx.duration_days }} day{{ rx.duration_days|pluralize }}</div></div>
+  {% empty %}<p class="muted">No medicines were prescribed.</p>{% endfor %}
+</section>
+{% endblock %}

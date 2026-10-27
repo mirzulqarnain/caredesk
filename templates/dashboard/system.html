@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Infrastructure{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Infrastructure</h1><p>Shows where this running copy of the app keeps its data and files.</p></div></div>
+{% include "dashboard/_panel_nav.html" %}
+<div class="grid cols-2">
+  <div class="panel" style="margin:0"><h2>Database</h2>
+    <dl class="facts"><dt>Engine</dt><dd>{{ info.db_engine }}</dd><dt>Host</dt><dd>{{ info.db_host }}</dd><dt>Database name</dt><dd>{{ info.db_name }}</dd><dt>Time zone</dt><dd>{{ info.timezone }}</dd></dl>
+    <div class="status" style="margin-top:18px"><span class="dot {% if not db_result.ok %}bad{% endif %}"></span>
+      <div><strong>{% if db_result.ok %}Connected{% else %}Connection failed{% endif %}</strong><div class="tiny">{{ db_result.detail }}{% if db_result.ok %} ({{ db_result.ms }} ms){% endif %}</div></div></div></div>
+  <div class="panel" style="margin:0"><h2>File storage</h2>
+    <dl class="facts"><dt>Backend</dt><dd>{{ info.storage_backend }}</dd><dt>Bucket</dt><dd>{{ info.bucket }}</dd><dt>Region</dt><dd>{{ info.region }}</dd></dl>
+    <form method="post" action="{% url 'panel_s3_test' %}" style="margin-top:18px">{% csrf_token %}<button class="btn" type="submit">Run storage test</button> <span class="tiny">Writes, reads and deletes a small file.</span></form>
+    {% if s3_result %}<div class="status" style="margin-top:14px"><span class="dot {% if not s3_result.ok %}bad{% endif %}"></span>
+      <div><strong>{% if s3_result.ok %}Storage works{% else %}Storage test failed{% endif %}</strong><div class="tiny">{{ s3_result.detail }}</div>{% if s3_result.url %}<div class="tiny">{{ s3_result.url }}</div>{% endif %}</div></div>{% endif %}</div>
+</div>
+<div class="panel" style="margin-top:20px"><h2>Data recorded in the database</h2>
+  <div class="figures" style="margin:0"><div class="figure"><b>{{ counts.patients }}</b><span>patients</span></div><div class="figure"><b>{{ counts.appointments }}</b><span>appointments</span></div>
+    <div class="figure"><b>{{ counts.lab_reports }}</b><span>lab reports (files in storage)</span></div><div class="figure"><b>{{ counts.avatars }}</b><span>profile photos</span></div></div>
+  <p class="tiny" style="margin-top:12px">The database stores each file's path. The file itself lives in the storage backend above.</p></div>
+{% endblock %}

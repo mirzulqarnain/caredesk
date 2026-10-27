@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ doctor.name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'doctors' %}">Doctors</a> / {{ doctor.name }}</div>
+<div class="split">
+  <div>
+    <div class="panel">
+      <div style="display:flex;gap:18px;align-items:center;margin-bottom:12px">
+        {% if doctor.user.avatar %}<img class="avatar" style="width:72px;height:72px" src="{{ doctor.user.avatar.url }}" alt="">{% else %}<span class="avatar" style="width:72px;height:72px;font-size:1.5rem;background:var(--brand);color:#fff">{{ doctor.user.initials }}</span>{% endif %}
+        <div><h1 style="margin:0">{{ doctor.name }}</h1><span class="badge">{{ doctor.specialty.name|default:"General" }}</span></div>
+      </div>
+      {% if doctor.bio %}<p>{{ doctor.bio }}</p>{% endif %}
+      <p class="tiny">{{ doctor.years_experience }} year{{ doctor.years_experience|pluralize }} of experience{% if doctor.room %}. Consults in {{ doctor.room }}{% endif %}.</p>
+    </div>
+    <div class="panel">
+      <div class="section-head"><h2>Working hours</h2>
+        {% if user.is_clinic_admin or doctor.user_id == user.id %}<a class="btn ghost small" href="{% url 'schedule_manage' doctor.id %}">Edit hours</a>{% endif %}</div>
+      {% if week %}
+      <ul class="outline">{% for day, items in week.items %}
+        <li><div class="grow title">{{ day }}</div><div>{% for s in items %}{{ s.start_time|time:"H:i" }} to {{ s.end_time|time:"H:i" }} <span class="tiny">({{ s.slot_minutes }} min visits)</span>{% if not forloop.last %}<br>{% endif %}{% endfor %}</div></li>
+      {% endfor %}</ul>
+      {% else %}<p class="muted">This doctor has not set working hours yet, so online booking is closed.</p>{% endif %}
+    </div>
+  </div>
+  <aside class="panel">
+    <h3>Consultation fee</h3>
+    <p style="font-size:2rem;font-weight:800;margin:0 0 14px">{{ CURRENCY }}{{ doctor.consultation_fee|floatformat:2 }}</p>
+    {% if user.is_authenticated and user.is_doctor %}<p class="tiny">Doctors cannot book appointments.</p>
+    {% elif week %}<a class="btn accent" style="width:100%" href="{% url 'book' %}?doctor={{ doctor.id }}">Book with {{ doctor.name }}</a>
+    {% else %}<button class="btn" style="width:100%" disabled>No hours available</button>{% endif %}
+  </aside>
+</div>
+{% endblock %}

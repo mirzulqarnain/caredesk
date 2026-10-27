@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}New invoice{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="crumbs"><a href="{% url 'invoice_list' %}">Billing</a> / New invoice</div>
+  <div class="form-card">
+    <h1>New invoice</h1>
+    <p class="muted">For a completed visit, open the appointment and press Create invoice to add the consultation fee automatically. Use this form for other charges.</p>
+    <form method="post">{% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <div class="form-actions"><button class="btn" type="submit">Create and add charges</button><a class="btn ghost" href="{% url 'invoice_list' %}">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

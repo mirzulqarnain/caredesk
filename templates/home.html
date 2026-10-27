@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Book a doctor online{% endblock %}
+{% block hero %}
+<section class="hero">
+  <div class="container">
+    <div>
+      <h1>See the right doctor without waiting on the phone</h1>
+      <p>Choose a doctor, pick a free time, and get your prescriptions, lab reports and invoices in one place.</p>
+      <div class="btn-row" style="margin-top:22px">
+        <a class="btn accent" href="{% url 'book' %}">Book an appointment</a>
+        <a class="btn ghost" href="{% url 'doctors' %}">Browse doctors</a>
+      </div>
+      {% if specialties %}<div class="chips">{% for s in specialties %}<a class="chip" href="{% url 'doctors' %}?specialty={{ s.id }}">{{ s.name }}</a>{% endfor %}</div>{% endif %}
+    </div>
+    <div class="ticket" aria-label="Sample appointment">
+      <div class="main">
+        <span class="badge">Scheduled</span>
+        <h3 style="margin-top:8px">Dr. Amina Rahman</h3>
+        <span class="muted">General Medicine</span>
+        <dl><dt>When</dt><dd>Tuesday, 10:30</dd><dt>Where</dt><dd>Room 1</dd><dt>Reason</dt><dd>Check-up</dd></dl>
+      </div>
+      <div class="stub"><b>10:30</b><span>30 min</span></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+<div class="section-head"><h2>Our doctors</h2><a href="{% url 'doctors' %}">See all doctors</a></div>
+{% if doctors %}
+  <div class="grid cols-3">{% for r in doctors %}{% include "partials/doctor_card.html" with d=r.doctor days=r.days %}{% endfor %}</div>
+{% else %}<div class="empty"><p>No doctors have been added yet.</p></div>{% endif %}
+
+<div class="figures" style="margin-top:40px">
+  <div class="figure"><b>{{ stats.doctors }}</b><span>doctors</span></div>
+  <div class="figure"><b>{{ stats.specialties }}</b><span>specialties</span></div>
+  <div class="figure"><b>{{ stats.patients }}</b><span>registered patients</span></div>
+</div>
+
+<h2>How it works</h2>
+<ol class="steps">
+  <li><h3>Register once</h3><p class="muted">Create a free patient account and fill in your health profile.</p></li>
+  <li><h3>Pick a time</h3><p class="muted">Choose a doctor and see only the times that are really free.</p></li>
+  <li><h3>Get your records</h3><p class="muted">After the visit your diagnosis, prescription and invoice appear in your account.</p></li>
+</ol>
+{% endblock %}

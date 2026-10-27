@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Patients</h1><p>{% if user.is_doctor %}People you have seen or are booked to see.{% else %}Everyone registered with the clinic.{% endif %}</p></div>
+  {% if user.runs_operations %}<a class="btn" href="{% url 'patient_create' %}">Register a patient</a>{% endif %}</div>
+<form class="filters" method="get" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name, username or phone" aria-label="Search patients">
+  <button class="btn" type="submit">Search</button>{% if q %}<a class="btn ghost" href="{% url 'patients' %}">Clear</a>{% endif %}
+</form>
+{% if patients %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Patient</th><th>Phone</th><th>Age</th><th>Blood group</th><th></th></tr></thead>
+  <tbody>{% for p in patients %}
+    <tr><td><strong><a href="{% url 'patient_detail' p.id %}">{{ p.display_name }}</a></strong><div class="tiny">@{{ p.username }}</div></td>
+      <td>{{ p.phone|default:"none" }}</td><td>{{ p.patient_profile.age|default:"not set" }}</td><td>{{ p.patient_profile.blood_group|default:"not set" }}</td>
+      <td><div class="row-actions">{% if user.runs_operations %}<a class="btn small" href="{% url 'book' %}?patient={{ p.id }}">Book</a>{% endif %}<a class="btn ghost small" href="{% url 'patient_detail' p.id %}">Open</a></div></td></tr>
+  {% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><p>No patients found.</p></div>{% endif %}
+{% endblock %}

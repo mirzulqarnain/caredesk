@@ -1,0 +1,10 @@
+<a class="doc-card" href="{% url 'doctor_detail' d.id %}">
+  {% if d.user.avatar %}<img class="photo" src="{{ d.user.avatar.url }}" alt="">{% else %}<span class="photo">{{ d.user.initials }}</span>{% endif %}
+  <div>
+    <h3>{{ d.name }}</h3>
+    <span class="badge">{{ d.specialty.name|default:"General" }}</span>
+    <div class="meta">{{ d.years_experience }} year{{ d.years_experience|pluralize }} experience{% if d.room %}, {{ d.room }}{% endif %}</div>
+    <div class="meta">Works {{ days }}</div>
+    <div class="meta"><span class="fee">{{ CURRENCY }}{{ d.consultation_fee|floatformat:2 }}</span> per visit</div>
+  </div>
+</a>

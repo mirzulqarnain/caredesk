@@ -1,0 +1,77 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Welcome{% endblock %} | {{ CLINIC_NAME }}</title>
+  <link rel="stylesheet" href="{% static 'css/caredesk.css' %}">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="topbar">
+    <div class="container">
+      <a class="brand" href="{% url 'home' %}"><span class="mark" aria-hidden="true"></span>CareDesk</a>
+      <nav class="nav" aria-label="Main">
+        {% with current=request.resolver_match.url_name %}
+        <a href="{% url 'doctors' %}" {% if current == 'doctors' or current == 'doctor_detail' %}aria-current="page"{% endif %}>Doctors</a>
+        {% if user.is_authenticated %}
+          {% if user.is_patient %}
+            <a href="{% url 'patient_dashboard' %}" {% if current == 'patient_dashboard' %}aria-current="page"{% endif %}>My health</a>
+            <a href="{% url 'book' %}" {% if current == 'book' %}aria-current="page"{% endif %}>Book</a>
+            <a href="{% url 'appointment_list' %}" {% if current == 'appointment_list' %}aria-current="page"{% endif %}>Appointments</a>
+            <a href="{% url 'my_records' %}" {% if current == 'my_records' %}aria-current="page"{% endif %}>Records</a>
+            <a href="{% url 'report_list' %}" {% if current == 'report_list' %}aria-current="page"{% endif %}>Lab reports</a>
+            <a href="{% url 'invoice_list' %}" {% if current == 'invoice_list' %}aria-current="page"{% endif %}>Invoices</a>
+          {% elif user.is_doctor %}
+            <a href="{% url 'doctor_dashboard' %}" {% if current == 'doctor_dashboard' %}aria-current="page"{% endif %}>Today</a>
+            <a href="{% url 'appointment_list' %}" {% if current == 'appointment_list' %}aria-current="page"{% endif %}>Appointments</a>
+            <a href="{% url 'patients' %}" {% if current == 'patients' %}aria-current="page"{% endif %}>Patients</a>
+            <a href="{% url 'report_list' %}" {% if current == 'report_list' %}aria-current="page"{% endif %}>Lab reports</a>
+            {% if user.doctor_profile %}<a href="{% url 'schedule_manage' user.doctor_profile.id %}" {% if current == 'schedule_manage' %}aria-current="page"{% endif %}>My hours</a>{% endif %}
+          {% else %}
+            {% if user.is_clinic_admin %}<a href="{% url 'panel' %}" {% if current == 'panel' %}aria-current="page"{% endif %}>Admin panel</a>{% endif %}
+            <a href="{% url 'desk_dashboard' %}" {% if current == 'desk_dashboard' %}aria-current="page"{% endif %}>Front desk</a>
+            <a href="{% url 'appointment_list' %}" {% if current == 'appointment_list' %}aria-current="page"{% endif %}>Appointments</a>
+            <a href="{% url 'patients' %}" {% if current == 'patients' %}aria-current="page"{% endif %}>Patients</a>
+            <a href="{% url 'invoice_list' %}" {% if current == 'invoice_list' %}aria-current="page"{% endif %}>Billing</a>
+          {% endif %}
+        {% endif %}
+        {% endwith %}
+      </nav>
+      <div class="userbox">
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile' %}" style="display:flex;align-items:center;gap:8px;color:#fff;text-decoration:none">
+            {% if user.avatar %}<img class="avatar" src="{{ user.avatar.url }}" alt="">{% else %}<span class="avatar">{{ user.initials }}</span>{% endif %}
+            {{ user.display_name }}
+          </a>
+          <span class="role-tag">{{ user.get_role_display }}</span>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn light small" type="submit">Log out</button></form>
+        {% else %}
+          <a class="btn light small" href="{% url 'login' %}">Log in</a>
+          <a class="btn accent small" href="{% url 'register' %}">Register as patient</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  {% block hero %}{% endblock %}
+
+  <main id="content">
+    <div class="container">
+      {% if messages %}
+      <ul class="messages" role="status">
+        {% for message in messages %}<li class="message {{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span>{{ CLINIC_NAME }}. A course project built with Django.</span>
+      <span>Demo system: do not enter real patient data.</span>
+    </div>
+  </footer>
+</body>
+</html>

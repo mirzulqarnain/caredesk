@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Doctors{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Our doctors</h1><p>{{ rows|length }} doctor{{ rows|length|pluralize }} available for booking.</p></div></div>
+<form class="filters" method="get" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name or specialty" aria-label="Search doctors">
+  <select name="specialty" aria-label="Specialty"><option value="">All specialties</option>
+    {% for s in specialties %}<option value="{{ s.id }}" {% if s.id|stringformat:"s" == selected_specialty %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
+  <button class="btn" type="submit">Apply</button>
+  {% if q or selected_specialty %}<a class="btn ghost" href="{% url 'doctors' %}">Clear</a>{% endif %}
+</form>
+{% if rows %}
+  <div class="grid cols-3">{% for r in rows %}{% include "partials/doctor_card.html" with d=r.doctor days=r.days %}{% endfor %}</div>
+{% else %}<div class="empty"><p>No doctors match your search.</p><a class="btn ghost" href="{% url 'doctors' %}">Show all doctors</a></div>{% endif %}
+{% endblock %}

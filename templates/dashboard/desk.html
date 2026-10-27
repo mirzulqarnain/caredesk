@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Front desk{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Front desk</h1><p>{% now "l j F Y" %}</p></div>
+  <div class="btn-row"><a class="btn accent" href="{% url 'book' %}">Book appointment</a><a class="btn" href="{% url 'patient_create' %}">Register patient</a><a class="btn ghost" href="{% url 'invoice_create' %}">New invoice</a></div></div>
+<div class="figures">
+  <div class="figure"><b>{{ todays|length }}</b><span>appointments today</span></div>
+  <div class="figure"><b>{{ waiting }}</b><span>still waiting</span></div>
+  <div class="figure"><b>{{ CURRENCY }}{{ collected|floatformat:2 }}</b><span>collected today</span></div>
+  <div class="figure"><b>{{ CURRENCY }}{{ outstanding|floatformat:2 }}</b><span>outstanding</span></div>
+</div>
+<div class="split">
+  <div class="panel"><h2>Today's schedule</h2>
+    {% if todays %}<div class="table-wrap" style="border:0"><table><thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Status</th></tr></thead><tbody>
+      {% for a in todays %}<tr><td>{{ a.start_time|time:"H:i" }}</td><td><a href="{% url 'appointment_detail' a.id %}">{{ a.patient.display_name }}</a></td><td>{{ a.doctor.name }}</td><td><span class="badge {{ a.badge }}">{{ a.get_status_display }}</span></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<div class="empty"><p>No appointments today.</p></div>{% endif %}
+  </div>
+  <aside>
+    <div class="panel"><h3>Visits waiting for an invoice</h3>
+      {% if to_bill %}<ul class="outline">{% for a in to_bill %}<li><div class="grow"><a href="{% url 'appointment_detail' a.id %}">{{ a.patient.display_name }}</a><div class="tiny">{{ a.date|date:"j M" }}, {{ a.doctor.name }}</div></div>
+        <form class="inline" method="post" action="{% url 'invoice_from_appointment' a.id %}">{% csrf_token %}<button class="btn small" type="submit">Invoice</button></form></li>{% endfor %}</ul>
+      {% else %}<p class="muted">Everything is billed.</p>{% endif %}
+    </div>
+    <div class="panel"><h3>Unpaid invoices</h3>
+      {% if open_invoices %}<ul class="outline">{% for i in open_invoices %}<li><div class="grow"><a href="{% url 'invoice_detail' i.id %}">{{ i.number }}</a><div class="tiny">{{ i.patient.display_name }}</div></div><strong>{{ CURRENCY }}{{ i.balance|floatformat:2 }}</strong></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No unpaid invoices.</p>{% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

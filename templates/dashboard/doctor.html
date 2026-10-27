@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Today{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Today, {% now "l j F" %}</h1><p>{{ doctor.name }}, {{ doctor.specialty.name|default:"General" }}</p></div><a class="btn ghost" href="{% url 'schedule_manage' doctor.id %}">My working hours</a></div>
+<div class="figures">
+  <div class="figure"><b>{{ waiting }}</b><span>waiting today</span></div>
+  <div class="figure"><b>{{ done_today }}</b><span>seen today</span></div>
+  <div class="figure"><b>{{ tomorrow }}</b><span>booked tomorrow</span></div>
+  <div class="figure"><b>{{ month_completed }}</b><span>visits this month</span></div>
+  <div class="figure"><b>{{ patients }}</b><span>patients in total</span></div>
+</div>
+<div class="split">
+  <div class="panel">
+    <h2>Today's appointments</h2>
+    {% if todays %}<ul class="outline">{% for a in todays %}
+      <li><div class="when"><b>{{ a.start_time|time:"H:i" }}</b><span>{{ a.end_time|time:"H:i" }}</span></div>
+        <div class="grow"><a class="title" href="{% url 'patient_detail' a.patient.id %}">{{ a.patient.display_name }}</a><div class="tiny">{{ a.reason|default:"No reason given" }}</div></div>
+        <span class="badge {{ a.badge }}">{{ a.get_status_display }}</span>
+        {% if a.status == 'scheduled' %}<a class="btn small" href="{% url 'consult' a.id %}">Start consultation</a>{% else %}<a class="btn ghost small" href="{% url 'appointment_detail' a.id %}">Open</a>{% endif %}</li>{% endfor %}</ul>
+    {% else %}<div class="empty"><p>No appointments today.</p></div>{% endif %}
+  </div>
+  <aside class="panel"><h3>Coming up</h3>
+    {% if upcoming %}<ul class="outline">{% for a in upcoming %}<li><div class="grow"><a href="{% url 'appointment_detail' a.id %}">{{ a.patient.display_name }}</a><div class="tiny">{{ a.date|date:"D j M" }}, {{ a.start_time|time:"H:i" }}</div></div></li>{% endfor %}</ul>
+    {% else %}<p class="muted">Nothing booked ahead.</p>{% endif %}
+  </aside>
+</div>
+{% endblock %}

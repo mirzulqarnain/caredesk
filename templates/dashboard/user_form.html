@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Add staff or doctor{% endblock %}
+{% block content %}
+<div class="narrow" style="width:min(720px,100% - 32px)">
+  <div class="crumbs"><a href="{% url 'panel_users' %}">Users</a> / New</div>
+  <div class="form-card">
+    <h1>Add staff or doctor</h1>
+    <p class="muted">Create the login and give the details to the person. Doctors then set their working hours.</p>
+    <form method="post">{% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <div class="form-actions"><button class="btn" type="submit">Create account</button><a class="btn ghost" href="{% url 'panel_users' %}">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

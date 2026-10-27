@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.display_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'patients' %}">Patients</a> / {{ patient.display_name }}</div>
+<div class="page-head">
+  <div><h1>{{ patient.display_name }}</h1><p>@{{ patient.username }}{% if patient.phone %}, {{ patient.phone }}{% endif %}{% if patient.email %}, {{ patient.email }}{% endif %}</p></div>
+  <div class="btn-row">
+    {% if user.runs_operations %}<a class="btn" href="{% url 'book' %}?patient={{ patient.id }}">Book appointment</a><a class="btn ghost" href="{% url 'invoice_create' %}?patient={{ patient.id }}">New invoice</a>{% endif %}
+    {% if clinical %}<a class="btn ghost" href="{% url 'report_list' %}?patient={{ patient.id }}">Lab reports</a>{% endif %}
+  </div>
+</div>
+<div class="split">
+  <div>
+    <div class="panel">
+      <h2>Health profile</h2>
+      {% if profile.allergies and profile.allergies|lower != "none" %}<div class="alert-box"><strong>Allergies:</strong> {{ profile.allergies }}</div>{% endif %}
+      <dl class="facts">
+        <dt>Age</dt><dd>{{ profile.age|default:"not set" }}</dd>
+        <dt>Gender</dt><dd>{{ profile.get_gender_display|default:"not set" }}</dd>
+        <dt>Blood group</dt><dd>{{ profile.blood_group|default:"not set" }}</dd>
+        <dt>Emergency contact</dt><dd>{{ profile.emergency_contact|default:"not set" }}</dd>
+        <dt>Address</dt><dd>{{ profile.address|default:"not set" }}</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h2>Appointments</h2>
+      {% if appointments %}<ul class="outline">{% for a in appointments %}
+        <li><div class="when"><b>{{ a.date|date:"j" }}</b><span>{{ a.date|date:"M Y" }}</span></div>
+          <div class="grow"><a class="title" href="{% url 'appointment_detail' a.id %}">{{ a.doctor.name }}</a><div class="tiny">{{ a.start_time|time:"H:i" }}, {{ a.reason|default:"No reason given" }}</div></div>
+          <span class="badge {{ a.badge }}">{{ a.get_status_display }}</span></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No appointments yet.</p>{% endif %}
+    </div>
+    {% if clinical %}
+    <div class="panel">
+      <h2>Visit history</h2>
+      {% if consultations %}<ul class="outline">{% for c in consultations %}
+        <li><div class="grow"><a class="title" href="{% url 'consultation_detail' c.id %}">{{ c.diagnosis }}</a><div class="tiny">{{ c.appointment.date|date:"j M Y" }} with {{ c.appointment.doctor.name }}</div></div></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No consultations recorded yet.</p>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <aside>
+    {% if not clinical %}<div class="privacy">Medical notes and lab reports are hidden from front desk accounts.</div>{% endif %}
+    {% if user.runs_operations %}
+    <div class="panel"><h3>Invoices</h3>
+      {% if invoices %}<ul class="outline">{% for i in invoices %}<li><div class="grow"><a href="{% url 'invoice_detail' i.id %}">{{ i.number }}</a><div class="tiny">{{ i.created_at|date:"j M Y" }}</div></div><span class="badge {{ i.badge }}">{{ i.status|capfirst }}</span></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No invoices yet.</p>{% endif %}
+    </div>{% endif %}
+    {% if clinical and reports %}
+    <div class="panel"><h3>Recent lab reports</h3><ul class="outline">{% for r in reports %}<li><div class="grow"><a href="{% url 'report_download' r.id %}" target="_blank" rel="noopener">{{ r.title }}</a><div class="tiny">{{ r.uploaded_at|date:"j M Y" }}</div></div></li>{% endfor %}</ul></div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

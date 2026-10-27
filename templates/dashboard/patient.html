@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}My health{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Hello, {{ user.first_name|default:user.username }}</h1><p>Your appointments, records and bills in one place.</p></div><a class="btn accent" href="{% url 'book' %}">Book an appointment</a></div>
+{% if profile_incomplete %}<div class="message warning">Your health profile is incomplete. <a href="{% url 'profile' %}">Add your date of birth, blood group and allergies</a> so doctors have what they need.</div>{% endif %}
+<div class="figures">
+  <div class="figure"><b>{{ upcoming|length }}</b><span>upcoming appointment{{ upcoming|length|pluralize }}</span></div>
+  <div class="figure"><b>{{ visits }}</b><span>completed visit{{ visits|pluralize }}</span></div>
+  <div class="figure"><b>{{ CURRENCY }}{{ due_total|floatformat:2 }}</b><span>to pay</span></div>
+</div>
+<div class="split">
+  <div>
+    <div class="panel">
+      <div class="section-head"><h2>Upcoming appointments</h2><a href="{% url 'appointment_list' %}">All appointments</a></div>
+      {% if upcoming %}<ul class="outline">{% for a in upcoming %}
+        <li><div class="when"><b>{{ a.date|date:"j" }}</b><span>{{ a.date|date:"M" }}</span></div>
+          <div class="grow"><a class="title" href="{% url 'appointment_detail' a.id %}">{{ a.doctor.name }}</a><div class="tiny">{{ a.date|date:"l" }} at {{ a.start_time|time:"H:i" }}. {{ a.doctor.specialty.name|default:"" }}</div></div>
+          <span class="badge">Scheduled</span></li>{% endfor %}</ul>
+      {% else %}<div class="empty"><p>Nothing booked.</p><a class="btn" href="{% url 'book' %}">Find a doctor</a></div>{% endif %}
+    </div>
+    <div class="panel">
+      <div class="section-head"><h2>Recent visits</h2><a href="{% url 'my_records' %}">All records</a></div>
+      {% if consultations %}<ul class="outline">{% for c in consultations %}<li><div class="grow"><a class="title" href="{% url 'consultation_detail' c.id %}">{{ c.diagnosis }}</a><div class="tiny">{{ c.appointment.date|date:"j M Y" }} with {{ c.appointment.doctor.name }}</div></div></li>{% endfor %}</ul>
+      {% else %}<p class="muted">Your visit summaries will appear here.</p>{% endif %}
+    </div>
+  </div>
+  <aside>
+    <div class="panel"><h3>Bills to pay</h3>
+      {% if due_invoices %}<ul class="outline">{% for i in due_invoices %}<li><div class="grow"><a href="{% url 'invoice_detail' i.id %}">{{ i.number }}</a><div class="tiny">{{ i.created_at|date:"j M Y" }}</div></div><strong>{{ CURRENCY }}{{ i.balance|floatformat:2 }}</strong></li>{% endfor %}</ul>
+      {% else %}<p class="muted">You are all paid up.</p>{% endif %}
+    </div>
+    <div class="panel"><div class="section-head"><h3>Lab reports</h3><a href="{% url 'report_upload' %}">Upload</a></div>
+      {% if reports %}<ul class="outline">{% for r in reports %}<li><div class="grow"><a href="{% url 'report_download' r.id %}" target="_blank" rel="noopener">{{ r.title }}</a><div class="tiny">{{ r.uploaded_at|date:"j M Y" }}</div></div></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No reports yet.</p>{% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+[Unit]
+Description=CareDesk LMS (gunicorn)
+After=network.target
+
+[Service]
+User=__USER__
+Group=www-data
+WorkingDirectory=/opt/caredesk
+ExecStart=/opt/caredesk/venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

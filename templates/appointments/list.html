@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Appointments</h1></div>{% if not user.is_doctor %}<a class="btn" href="{% url 'book' %}">Book appointment</a>{% endif %}</div>
+<form class="filters" method="get">
+  <select name="when" aria-label="When">
+    <option value="upcoming" {% if when == 'upcoming' %}selected{% endif %}>Upcoming</option>
+    <option value="today" {% if when == 'today' %}selected{% endif %}>Today</option>
+    <option value="past" {% if when == 'past' %}selected{% endif %}>Past</option>
+    <option value="all" {% if when == 'all' %}selected{% endif %}>All</option>
+  </select>
+  <select name="status" aria-label="Status"><option value="">Any status</option>{% for v, l in statuses %}<option value="{{ v }}" {% if v == status %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  {% if not user.is_patient %}<input type="search" name="q" value="{{ q }}" placeholder="Patient name" aria-label="Patient name">{% endif %}
+  <button class="btn" type="submit">Apply</button>
+</form>
+{% if appointments %}
+<div class="table-wrap"><table>
+  <thead><tr><th>When</th>{% if not user.is_patient %}<th>Patient</th>{% endif %}{% if not user.is_doctor %}<th>Doctor</th>{% endif %}<th>Reason</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for a in appointments %}
+    <tr>
+      <td><strong>{{ a.date|date:"D j M Y" }}</strong><div class="tiny">{{ a.start_time|time:"H:i" }} to {{ a.end_time|time:"H:i" }}</div></td>
+      {% if not user.is_patient %}<td>{% if user.is_patient %}{% else %}<a href="{% url 'patient_detail' a.patient.id %}">{{ a.patient.display_name }}</a>{% endif %}</td>{% endif %}
+      {% if not user.is_doctor %}<td>{{ a.doctor.name }}<div class="tiny">{{ a.doctor.specialty.name|default:"" }}</div></td>{% endif %}
+      <td>{{ a.reason|default:"none given" }}</td>
+      <td><span class="badge {{ a.badge }}">{{ a.get_status_display }}</span></td>
+      <td><div class="row-actions"><a class="btn ghost small" href="{% url 'appointment_detail' a.id %}">Open</a>
+        {% if user.is_doctor and a.status == 'scheduled' %}<a class="btn small" href="{% url 'consult' a.id %}">Consult</a>{% endif %}</div></td>
+    </tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><p>No appointments match these filters.</p>{% if not user.is_doctor %}<a class="btn" href="{% url 'book' %}">Book an appointment</a>{% endif %}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not allowed{% endblock %}
+{% block content %}
+<div class="narrow empty">
+  <h1>You do not have access to this page</h1>
+  <p>Your account role does not allow this. Medical records are visible only to the patient, their doctors and admins.</p>
+  {% if user.is_authenticated %}<a class="btn" href="{% url 'dashboard' %}">Go to my dashboard</a>{% else %}<a class="btn" href="{% url 'login' %}">Log in</a>{% endif %}
+</div>
+{% endblock %}

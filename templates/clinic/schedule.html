@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Working hours{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'doctor_detail' doctor.id %}">{{ doctor.name }}</a> / Working hours</div>
+<div class="page-head"><div><h1>Working hours</h1><p>Patients can book only inside these periods. Each period is cut into visits of the length you choose.</p></div></div>
+<div class="split">
+  <div class="panel">
+    {% if schedules %}
+    <ul class="outline">{% for s in schedules %}
+      <li><div class="grow"><div class="title">{{ s.get_weekday_display }}</div><div class="tiny">{{ s.start_time|time:"H:i" }} to {{ s.end_time|time:"H:i" }}, {{ s.slot_minutes }} minute visits</div></div>
+        <form class="inline" method="post" action="{% url 'schedule_delete' doctor.id s.id %}" onsubmit="return confirm('Remove these hours?')">{% csrf_token %}<button class="btn danger small" type="submit">Remove</button></form></li>
+    {% endfor %}</ul>
+    {% else %}<div class="empty"><p>No hours yet. Add the first working period.</p></div>{% endif %}
+  </div>
+  <aside class="panel">
+    <h3>Add working hours</h3>
+    <form method="post">{% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button class="btn" type="submit">Add hours</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

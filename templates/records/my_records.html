@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}My records{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>My medical records</h1><p>Your visits, diagnoses and prescriptions.</p></div><a class="btn ghost" href="{% url 'report_list' %}">Lab reports</a></div>
+{% if consultations %}
+{% for c in consultations %}
+<div class="panel">
+  <div class="section-head"><div><h3>{{ c.diagnosis }}</h3><span class="tiny">{{ c.appointment.date|date:"j F Y" }} with {{ c.appointment.doctor.name }}, {{ c.appointment.doctor.specialty.name|default:"General" }}</span></div>
+    <a class="btn ghost small" href="{% url 'consultation_detail' c.id %}">Open and print</a></div>
+  {% if c.notes %}<p class="muted">{{ c.notes }}</p>{% endif %}
+  {% for rx in c.prescriptions.all %}<div class="rx-row"><div><strong>{{ rx.medicine }}</strong> {{ rx.dosage }}<div class="tiny">{{ rx.frequency }}</div></div><div class="tiny">{{ rx.duration_days }} day{{ rx.duration_days|pluralize }}</div></div>{% endfor %}
+</div>
+{% endfor %}
+{% else %}<div class="empty"><p>No visits recorded yet. After your first consultation it will show here.</p><a class="btn" href="{% url 'book' %}">Book an appointment</a></div>{% endif %}
+{% endblock %}

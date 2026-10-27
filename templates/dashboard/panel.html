@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Admin panel{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Admin panel</h1><p>How the clinic is doing.</p></div></div>
+{% include "dashboard/_panel_nav.html" %}
+<div class="figures">
+  <div class="figure"><b>{{ totals.patients }}</b><span>patients</span></div>
+  <div class="figure"><b>{{ totals.doctors }}</b><span>doctors</span></div>
+  <div class="figure"><b>{{ totals.appointments }}</b><span>appointments, {{ totals.today }} today</span></div>
+  <div class="figure"><b>{{ CURRENCY }}{{ totals.revenue|floatformat:2 }}</b><span>collected in total</span></div>
+  <div class="figure"><b>{{ CURRENCY }}{{ totals.outstanding|floatformat:2 }}</b><span>outstanding</span></div>
+</div>
+<div class="grid cols-2">
+  <div class="panel" style="margin:0"><h2>Revenue by month</h2>
+    {% if revenue %}<div class="bars">{% for label, value, pct in revenue %}<div class="bar-row"><span>{{ label }}</span><div class="track"><span style="width:{{ pct }}%"></span></div><strong>{{ CURRENCY }}{{ value|floatformat:0 }}</strong></div>{% endfor %}</div>
+    {% else %}<p class="muted">No payments recorded yet.</p>{% endif %}</div>
+  <div class="panel" style="margin:0"><h2>Appointments by status</h2>
+    <div class="bars">{% for label, n, pct in statuses %}<div class="bar-row"><span>{{ label }}</span><div class="track"><span style="width:{{ pct }}%"></span></div><strong>{{ n }}</strong></div>{% endfor %}</div>
+    <h3 style="margin-top:24px">Busiest doctors</h3>
+    <div class="bars">{% for d, n, pct in busiest %}<div class="bar-row"><span>{{ d.name }}</span><div class="track"><span style="width:{{ pct }}%"></span></div><strong>{{ n }}</strong></div>{% endfor %}</div></div>
+</div>
+{% endblock %}

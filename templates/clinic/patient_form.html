@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Register a patient{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="crumbs"><a href="{% url 'patients' %}">Patients</a> / New</div>
+  <div class="form-card">
+    <h1>Register a patient</h1>
+    <p class="muted">For walk-in patients. After saving you can book their first visit.</p>
+    <form method="post">{% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <div class="form-actions"><button class="btn" type="submit">Register and book</button><a class="btn ghost" href="{% url 'patients' %}">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

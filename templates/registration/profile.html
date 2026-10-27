@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Your profile{% endblock %}
+{% block content %}
+<div class="narrow" style="width:min(720px,100% - 32px)">
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    <div class="form-card">
+      <h1>Your profile</h1>
+      <p class="muted">Signed in as <strong>{{ user.username }}</strong> ({{ user.get_role_display }}).</p>
+      {% include "partials/form_fields.html" with form=account_form %}
+    </div>
+    {% if patient_form %}
+    <div class="form-card" style="margin-top:20px">
+      <h2>Health profile</h2>
+      <p class="muted">Your doctor sees this before every visit. Only you, your doctors and admins can view it.</p>
+      {% include "partials/form_fields.html" with form=patient_form %}
+    </div>
+    {% endif %}
+    <div class="form-actions" style="margin-top:20px"><button class="btn" type="submit">Save profile</button></div>
+  </form>
+</div>
+{% endblock %}

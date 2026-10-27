@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Users</h1><p>Accounts for patients, doctors, front desk and admins.</p></div><a class="btn" href="{% url 'panel_user_create' %}">Add staff or doctor</a></div>
+{% include "dashboard/_panel_nav.html" %}
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search name or username" aria-label="Search users">
+  <select name="role" aria-label="Role"><option value="">All roles</option>{% for v, l in roles %}<option value="{{ v }}" {% if v == role %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <button class="btn" type="submit">Filter</button>
+</form>
+<div class="table-wrap"><table>
+  <thead><tr><th>User</th><th>Role</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for u in users %}
+  <tr><td><strong>{{ u.display_name }}</strong><div class="tiny">@{{ u.username }}{% if u.email %}, {{ u.email }}{% endif %}</div></td>
+    <td><span class="badge plain">{{ u.get_role_display }}</span></td><td>{{ u.date_joined|date:"j M Y" }}</td>
+    <td>{% if u.is_active %}<span class="badge ok">Active</span>{% else %}<span class="badge bad">Disabled</span>{% endif %}</td>
+    <td><div class="row-actions">{% if u.id != user.id %}<form class="inline" method="post" action="{% url 'panel_user_update' u.id %}">{% csrf_token %}<input type="hidden" name="action" value="toggle_active">
+      <button class="btn {% if u.is_active %}danger{% else %}ghost{% endif %} small" type="submit">{% if u.is_active %}Disable{% else %}Enable{% endif %}</button></form>{% endif %}</div></td></tr>
+  {% empty %}<tr><td colspan="5" class="muted">No users match.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

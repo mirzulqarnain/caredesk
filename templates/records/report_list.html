@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Lab reports{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Lab reports</h1><p>{% if patient and not user.is_patient %}For {{ patient.display_name }}.{% elif user.is_patient %}Files stored securely in the clinic's S3 bucket.{% else %}Reports for your patients.{% endif %}</p></div>
+  {% if user.is_patient or patient %}<a class="btn" href="{% url 'report_upload' %}{% if not user.is_patient %}?patient={{ patient.id }}{% endif %}">Upload a report</a>{% endif %}</div>
+{% if reports %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Report</th>{% if not patient or not user.is_patient %}<th>Patient</th>{% endif %}<th>Type</th><th>Uploaded</th><th></th></tr></thead>
+  <tbody>{% for r in reports %}
+  <tr><td><strong>{{ r.title }}</strong><div class="tiny">{{ r.filename }}{% if r.notes %}. {{ r.notes }}{% endif %}</div></td>
+    {% if not patient or not user.is_patient %}<td>{{ r.patient.display_name }}</td>{% endif %}
+    <td>{{ r.get_report_type_display }}</td><td>{{ r.uploaded_at|date:"j M Y" }}<div class="tiny">by {{ r.uploaded_by.display_name|default:"unknown" }}</div></td>
+    <td><div class="row-actions"><a class="btn small" href="{% url 'report_download' r.id %}" target="_blank" rel="noopener">Open</a>
+      {% if user.is_clinic_admin or r.uploaded_by_id == user.id %}<form class="inline" method="post" action="{% url 'report_delete' r.id %}" onsubmit="return confirm('Delete this report?')">{% csrf_token %}<button class="btn danger small" type="submit">Delete</button></form>{% endif %}</div></td></tr>
+  {% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><p>No lab reports yet.</p></div>{% endif %}
+{% endblock %}

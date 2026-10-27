@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Appointment{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'appointment_list' %}">Appointments</a> / {{ appt.date|date:"j M Y" }}</div>
+<div class="page-head"><div><h1>{{ appt.date|date:"l j F Y" }}, {{ appt.start_time|time:"H:i" }}</h1>
+  <p><span class="badge {{ appt.badge }}">{{ appt.get_status_display }}</span> with {{ appt.doctor.name }}</p></div></div>
+<div class="split">
+  <div>
+    <div class="panel">
+      <dl class="facts">
+        <dt>Patient</dt><dd>{% if user.is_patient %}{{ appt.patient.display_name }}{% else %}<a href="{% url 'patient_detail' appt.patient.id %}">{{ appt.patient.display_name }}</a>{% endif %}</dd>
+        <dt>Doctor</dt><dd><a href="{% url 'doctor_detail' appt.doctor.id %}">{{ appt.doctor.name }}</a>, {{ appt.doctor.specialty.name|default:"General" }}</dd>
+        <dt>Time</dt><dd>{{ appt.start_time|time:"H:i" }} to {{ appt.end_time|time:"H:i" }}{% if appt.doctor.room %}, {{ appt.doctor.room }}{% endif %}</dd>
+        <dt>Reason</dt><dd>{{ appt.reason|default:"none given" }}</dd>
+        <dt>Fee</dt><dd>{{ CURRENCY }}{{ appt.doctor.consultation_fee|floatformat:2 }}</dd>
+      </dl>
+    </div>
+    {% if consultation and can_see_clinical %}
+    <div class="panel">
+      <div class="section-head"><h2>Consultation</h2><a class="btn ghost small" href="{% url 'consultation_detail' consultation.id %}">Open summary and prescription</a></div>
+      <p><strong>Diagnosis:</strong> {{ consultation.diagnosis }}</p>
+    </div>
+    {% endif %}
+  </div>
+  <aside class="panel">
+    <h3>Actions</h3>
+    <div class="grid" style="gap:10px">
+      {% if can_consult and appt.status != 'cancelled' and appt.status != 'no_show' %}<a class="btn accent" href="{% url 'consult' appt.id %}">{% if consultation %}Edit consultation{% else %}Start consultation{% endif %}</a>{% endif %}
+      {% if invoice %}<a class="btn" href="{% url 'invoice_detail' invoice.id %}">View invoice {{ invoice.number }}</a>{% endif %}
+      {% if can_invoice %}<form method="post" action="{% url 'invoice_from_appointment' appt.id %}">{% csrf_token %}<button class="btn" style="width:100%" type="submit">Create invoice</button></form>{% endif %}
+      {% if can_mark_no_show %}<form method="post" action="{% url 'appointment_no_show' appt.id %}">{% csrf_token %}<button class="btn ghost" style="width:100%" type="submit">Mark as no show</button></form>{% endif %}
+      {% if can_cancel %}<form method="post" action="{% url 'appointment_cancel' appt.id %}" onsubmit="return confirm('Cancel this appointment?')">{% csrf_token %}<button class="btn danger" style="width:100%" type="submit">Cancel appointment</button></form>{% endif %}
+      {% if not can_consult and not invoice and not can_invoice and not can_mark_no_show and not can_cancel %}<p class="muted" style="margin:0">No actions available.</p>{% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

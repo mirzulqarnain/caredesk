@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="form-card">
+    <h1>Log in</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="form-actions"><button class="btn" type="submit">Log in</button></div>
+    </form>
+    <p class="muted" style="margin-top:20px">New patient? <a href="{% url 'register' %}">Create an account</a>. Doctors and front desk staff receive their login from the clinic admin.</p>
+  </div>
+</div>
+{% endblock %}

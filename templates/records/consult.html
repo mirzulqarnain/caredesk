@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Consultation{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'appointment_detail' appt.id %}">Appointment</a> / Consultation</div>
+<div class="page-head"><div><h1>{{ appt.patient.display_name }}</h1><p>{{ appt.date|date:"l j F Y" }}, {{ appt.start_time|time:"H:i" }}. Reason: {{ appt.reason|default:"none given" }}</p></div></div>
+{% if profile.allergies and profile.allergies|lower != "none" %}<div class="alert-box"><strong>Allergies:</strong> {{ profile.allergies }}</div>{% endif %}
+<div class="split">
+  <div>
+    <form class="panel" method="post">{% csrf_token %}
+      <h2>Findings and diagnosis</h2>
+      {% include "partials/form_fields.html" %}
+      <button class="btn" type="submit">Save consultation</button>
+      <span class="tiny">Saving marks the appointment as completed.</span>
+    </form>
+
+    {% if consultation %}
+    <div class="panel">
+      <div class="section-head"><h2>Prescription</h2><a class="btn ghost small" href="{% url 'consultation_detail' consultation.id %}">Print view</a></div>
+      {% for rx in consultation.prescriptions.all %}
+      <div class="rx-row">
+        <div><strong>{{ rx.medicine }}</strong> {{ rx.dosage }}<div class="tiny">{{ rx.frequency }} for {{ rx.duration_days }} day{{ rx.duration_days|pluralize }}{% if rx.instructions %}. {{ rx.instructions }}{% endif %}</div></div>
+        <form class="inline" method="post" action="{% url 'prescription_delete' appt.id rx.id %}">{% csrf_token %}<button class="btn danger small" type="submit">Remove</button></form>
+      </div>
+      {% empty %}<p class="muted">No medicines added yet.</p>{% endfor %}
+      <form method="post" action="{% url 'prescription_add' appt.id %}" style="margin-top:18px;border-top:1px solid var(--line);padding-top:18px">{% csrf_token %}
+        <h3>Add a medicine</h3>
+        {% include "partials/form_fields.html" with form=rx_form %}
+        <button class="btn" type="submit">Add medicine</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+  <aside>
+    <div class="panel">
+      <h3>Patient</h3>
+      <dl class="facts" style="grid-template-columns:110px 1fr">
+        <dt>Age</dt><dd>{{ profile.age|default:"not set" }}</dd>
+        <dt>Gender</dt><dd>{{ profile.get_gender_display|default:"not set" }}</dd>
+        <dt>Blood group</dt><dd>{{ profile.blood_group|default:"not set" }}</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h3>Earlier visits</h3>
+      {% if previous %}<ul class="outline">{% for c in previous %}<li><div class="grow"><div class="title">{{ c.diagnosis }}</div><div class="tiny">{{ c.appointment.date|date:"j M Y" }}, {{ c.appointment.doctor.name }}</div></div></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No earlier visits recorded.</p>{% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

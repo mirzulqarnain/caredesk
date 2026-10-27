@@ -1,0 +1,9 @@
+<div class="btn-row" style="margin-bottom:24px">
+  {% with c=request.resolver_match.url_name %}
+  <a class="btn {% if c != 'panel' %}ghost{% endif %}" href="{% url 'panel' %}">Overview</a>
+  <a class="btn {% if c != 'panel_users' %}ghost{% endif %}" href="{% url 'panel_users' %}">Users</a>
+  <a class="btn {% if c != 'panel_user_create' %}ghost{% endif %}" href="{% url 'panel_user_create' %}">Add staff or doctor</a>
+  <a class="btn {% if c != 'panel_system' %}ghost{% endif %}" href="{% url 'panel_system' %}">Infrastructure</a>
+  <a class="btn ghost" href="{% url 'admin:index' %}">Django admin</a>
+  {% endwith %}
+</div>
