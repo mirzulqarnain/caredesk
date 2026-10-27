@@ -21,7 +21,7 @@ services:
       retries: 10
 
   web:
-    image: YOUR_DOCKERHUB_USER/caredesk:latest
+    image: zulmir/caredesk:latest
     container_name: caredesk_web
     restart: unless-stopped
     depends_on:
