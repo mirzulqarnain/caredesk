@@ -7,7 +7,7 @@ lab reports in **Amazon S3**. It deploys to **EC2** and to **Elastic Beanstalk**
 No third party services, no payment gateway, no JWT, no API keys. On AWS it reaches S3 through the server's IAM role.
 The "online payment" is simulated inside the app.
 
-## Run it on your computer (2 minutes)
+## Run it on your computer
 
 ```bash
 python -m venv venv
