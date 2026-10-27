@@ -1,5 +1,6 @@
 # PART I: run on EC2 with:  docker compose up -d
 # Replace YOUR_DOCKERHUB_USER with your Docker Hub username (must match the pushed image).
+# Port mappings are HOST:CONTAINER.
 services:
   db:
     image: postgres:16-alpine
@@ -20,7 +21,7 @@ services:
       retries: 10
 
   web:
-    image: zulmir/caredesk:latest
+    image: YOUR_DOCKERHUB_USER/caredesk:latest
     container_name: caredesk_web
     restart: unless-stopped
     depends_on:
